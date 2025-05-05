@@ -18,8 +18,8 @@ services:
     volumes:
       - ./data:/data
     ports:
-      - "44772:40772"
+      - "42772:40772"
     env_file: .env
     environment:
-      - RUST_LOG=debug
+      - RUST_LOG=info
       - TZ=Asia/Tokyo
