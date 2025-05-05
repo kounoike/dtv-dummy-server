@@ -33,7 +33,7 @@ IFS='
 '
 
 if [ "z$UPLINK_URL" != "z" ]; then
-  SERVICES=$(curl -s "${UPLINK_URL}/api/services" | jq -r '.[] | select(.channel.type == "GR") | "{ name: " + .name + ", type: " + .channel.type + ", channel: " + .channel.channel + ", commandVars: { channel_type: GR }, isDisabled: false }"')
+  SERVICES=$(curl -s "${UPLINK_URL}/api/services" | jq -r '.[] | select(.channel.type == "GR") | "{ name: " + .name + ", type: " + .channel.type + ", channel: '" + .channel.channel + "', commandVars: { channel_type: GR }, isDisabled: false }"')
 
   for S in $SERVICES; do
     echo "  - $S" >> $MIRAKURUN_CONFIG_DIR/channels.yml
