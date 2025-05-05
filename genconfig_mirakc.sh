@@ -36,7 +36,7 @@ IFS='
 '
 
 if [ "z$UPLINK_URL" != "z" ]; then
-  SERVICES=$(curl -s "${UPLINK_URL}/api/services" | jq -r '.[] | select(.channel.type == "GR") | "{ name: " + .name + ", type: " + .channel.type + ", channel: " + .channel.channel + " }"')
+  SERVICES=$(curl -s "${UPLINK_URL}/api/services" | jq -r '.[] | select(.channel.type == "GR") | "{ name: " + .name + ", type: " + .channel.type + ", channel: \"" + .channel.channel + "\" }"')
 
   for S in $SERVICES; do
     echo "  - $S" >> $MIRAKC_CONFIG
