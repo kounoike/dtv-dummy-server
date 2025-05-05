@@ -80,6 +80,6 @@ ADD entrypoint_mirakc.sh tsp.sh genconfig_mirakc.sh /
 ENV MIRAKC_CONFIG=/etc/mirakc/config.yml
 EXPOSE 40772
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint_mirakc.sh"]
 
 CMD []
