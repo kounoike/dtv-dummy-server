@@ -56,6 +56,8 @@ services:
 `python event_gen.py > data/eit.xml` で適当な番組表を生成します。
 スクリプトは今のところ適当なので、必要に応じて修正してください。
 
+`eit.xml` の書き方は[この辺](https://github.com/tsduck/tsduck/blob/master/src/libtsduck/dtv/tables/dvb/tsEIT.xml)を参考にしてください。
+
 ## TODO
 
 - 番組表生成スクリプトをもっと便利にする
