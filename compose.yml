@@ -1,0 +1,25 @@
+services:
+  mirakurun:
+    build:
+      context: .
+      dockerfile: Dockerfile-mirakurun
+    volumes:
+      - ./data:/data
+    ports:
+      - "43772:40772"
+    env_file: .env
+    environment:
+      - TZ=Asia/Tokyo
+
+  mirakc:
+    build:
+      context: .
+      dockerfile: Dockerfile-mirakc
+    volumes:
+      - ./data:/data
+    ports:
+      - "44772:40772"
+    env_file: .env
+    environment:
+      - RUST_LOG=debug
+      - TZ=Asia/Tokyo

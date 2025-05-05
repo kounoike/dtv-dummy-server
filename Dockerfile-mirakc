@@ -1,0 +1,85 @@
+# This file works properly only with Docker.
+# Assumed that docker.io registry is used.
+#
+# `podman buildx build` doesn't work at this point because it doesn't support
+# the following build arguments that docker set automagically:
+#
+#   BUILDPLATFORM
+#   TARGETPLATFORM
+#   TARGETOS
+#   TARGETARCH
+#   TARGETVARIANT
+
+ARG TOOLS_TAG=debian
+# We set `sid` here in order to avoid the `InvalidDefaultArgInFrom` warning,
+# but this argument is always specified in build commands.  As a result, `sid`
+# is never used.
+ARG DEBIAN_CODENAME=sid
+
+FROM mirakc/tools:$TOOLS_TAG AS mirakc-tools
+
+FROM --platform=$BUILDPLATFORM mirakc/buildenv:debian-$TARGETOS-$TARGETARCH$TARGETVARIANT AS mirakc-build
+ARG BUILDPLATFORM
+ARG TARGETPLATFORM
+ARG PROFILE=release
+
+RUN git clone --recursive https://github.com/mirakc/mirakc.git /build && \
+    git -C /build checkout 3.4.15
+WORKDIR /build
+
+ADD ./mirakc.patch ./
+RUN patch -p1 < mirakc.patch
+RUN sh ./docker/build-scripts/mirakc.sh debian $BUILDPLATFORM $TARGETPLATFORM $PROFILE
+
+FROM debian:$DEBIAN_CODENAME-slim AS mirakc
+LABEL maintainer="Contributors of mirakc"
+COPY --from=mirakc-tools /usr/local/bin /usr/local/bin/
+COPY --from=mirakc-build /usr/local/bin/mirakc /usr/local/bin/
+COPY --from=mirakc-build /build/resources/strings.yml /etc/mirakc/strings.yml
+ARG PROFILE=release
+RUN set -eux \
+ && export DEBIAN_FRONTEND=noninteractive \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl dvb-tools jq socat \
+ && if [ "$PROFILE" = perf ]; then apt-get install -y --no-install-recommends heaptrack valgrind; fi \
+ # cleanup
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /var/tmp/* \
+ && rm -rf /tmp/*
+ENV MIRAKC_CONFIG=/etc/mirakc/config.yml
+ENV MIRAKC_BUILD_PROFILE=$PROFILE
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake flex bison dos2unix curl tar zip linux-libc-dev dpkg-dev python3 \
+    ca-certificates \
+    clang-19 \
+    ffmpeg \
+    git \
+    jq \
+    libedit-dev \
+    libssl-dev \
+    libreadline-dev \
+    lsb-release \
+    python-is-python3 \
+    sudo \
+    zlib1g-dev
+
+
+RUN git clone https://github.com/tsduck/tsduck.git /tmp/tsduck && \
+    git -C /tmp/tsduck checkout c1945bcfe9a4eeff9dace69920c69b54402edf39
+
+WORKDIR /tmp/tsduck
+RUN LLLVM=1 NOTEST=1 NODEKTEC=1 NOHIDES=1 NOVATEK=1 NOOPENSSL=1 NOZLIB=1 NOCURL=1 NOPCSC=1 NOSRT=1 NORIST=1 NOJAVA=1 NOHWACCEL=1 ./scripts/install-prerequisites.sh
+RUN make CC=clang-19 CXX=clang++-19 LLVM=1 NOTEST=1 NODEKTEC=1 NOHIDES=1 NOVATEK=1 NOOPENSSL=1 NOZLIB=1 NOCURL=1 NOPCSC=1 NOSRT=1 NORIST=1 NOJAVA=1 NOHWACCEL=1 -j$(nproc) default
+RUN make CC=clang-19 CXX=clang++-19 LLVM=1 NOTEST=1 NODEKTEC=1 NOHIDES=1 NOVATEK=1 NOOPENSSL=1 NOZLIB=1 NOCURL=1 NOPCSC=1 NOSRT=1 NORIST=1 NOJAVA=1 NOHWACCEL=1 install
+
+WORKDIR /
+ADD entrypoint_mirakc.sh tsp.sh genconfig_mirakc.sh /
+
+ENV MIRAKC_CONFIG=/etc/mirakc/config.yml
+EXPOSE 40772
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD []

@@ -1,0 +1,31 @@
+FROM chinachu/mirakurun:4.0.0-beta.18
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake flex bison dos2unix curl tar zip linux-libc-dev dpkg-dev python3 \
+    ca-certificates \
+    clang-19 \
+    ffmpeg \
+    git \
+    jq \
+    libedit-dev \
+    libssl-dev \
+    libreadline-dev \
+    lsb-release \
+    python-is-python3 \
+    sudo \
+    zlib1g-dev
+
+
+RUN git clone https://github.com/tsduck/tsduck.git /tmp/tsduck && \
+    git -C /tmp/tsduck checkout c1945bcfe9a4eeff9dace69920c69b54402edf39
+
+WORKDIR /tmp/tsduck
+RUN LLLVM=1 NOTEST=1 NODEKTEC=1 NOHIDES=1 NOVATEK=1 NOOPENSSL=1 NOZLIB=1 NOCURL=1 NOPCSC=1 NOSRT=1 NORIST=1 NOJAVA=1 NOHWACCEL=1 ./scripts/install-prerequisites.sh
+RUN make CC=clang-19 CXX=clang++-19 LLVM=1 NOTEST=1 NODEKTEC=1 NOHIDES=1 NOVATEK=1 NOOPENSSL=1 NOZLIB=1 NOCURL=1 NOPCSC=1 NOSRT=1 NORIST=1 NOJAVA=1 NOHWACCEL=1 -j$(nproc) default
+RUN make CC=clang-19 CXX=clang++-19 LLVM=1 NOTEST=1 NODEKTEC=1 NOHIDES=1 NOVATEK=1 NOOPENSSL=1 NOZLIB=1 NOCURL=1 NOPCSC=1 NOSRT=1 NORIST=1 NOJAVA=1 NOHWACCEL=1 install
+
+ADD entrypoint_mirakurun.sh tsp.sh genconfig_mirakurun.sh /
+
+WORKDIR /app
+
+ENTRYPOINT ["/entrypoint_mirakurun.sh"]
