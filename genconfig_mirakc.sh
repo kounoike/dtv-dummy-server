@@ -25,7 +25,7 @@ EOT
 
 for i in "${!FILES[@]}"; do
   F="${FILES[i]}"
-  echo "  - { name: $(basename $F .ts), type: SKY, channel: $i, extra-args: '$F' }"  >> $MIRAKC_CONFIG
+  echo "  - { name: '$(basename $F .ts)', type: SKY, channel: $i, extra-args: '$F' }"  >> $MIRAKC_CONFIG
 done
 
 echo "" >> $MIRAKC_CONFIG

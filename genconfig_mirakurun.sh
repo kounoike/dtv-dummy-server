@@ -23,7 +23,7 @@ EOT
 
 for i in "${!FILES[@]}"; do
   F="${FILES[i]}"
-  echo "  - { name: $(basename $F .ts), type: SKY, channel: '$i', commandVars: { filename: '$F' }, isDisabled: false }"  >> $MIRAKURUN_CONFIG_DIR/channels.yml
+  echo "  - { name: '$(basename $F .ts)', type: SKY, channel: '$i', commandVars: { filename: '$F' }, isDisabled: false }"  >> $MIRAKURUN_CONFIG_DIR/channels.yml
 done
 
 
