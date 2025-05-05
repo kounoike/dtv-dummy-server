@@ -6,6 +6,7 @@ export DISABLE_PCSCD=1
 export DISABLE_B25_TEST=1
 
 mkdir -p /data/mirakurun
+rm -f /data/mirakurun/mirakurun
 ln -s /data/mirakurun /app-data
 
 /genconfig_mirakurun.sh
