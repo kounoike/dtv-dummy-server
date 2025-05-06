@@ -14,7 +14,7 @@ function gen_dummy() {
   ffmpeg -hide_banner \
     -f lavfi -i "${gen}" \
     -f lavfi -i "${agen}" \
-    -vf "${resize},${filter}" \
+    -vf "${resize},${filter},fps=fps=30000/1001" \
     -pix_fmt yuv420p \
     -c:v mpeg2video \
     -c:a aac \
